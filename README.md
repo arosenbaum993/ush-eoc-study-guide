@@ -4,6 +4,8 @@ What's in this folder:
 
 - `index.html`: the interactive study guide, with all 102 questions, Know It reviews, and Help Cards
 - `images/`: the 17 cartoons, maps, and photos plus the 19 charts and diagrams (keep this folder next to `index.html`)
+- `quiz.html`: a standalone 50-question quiz, 10 questions from each domain, drawn from the study guide
+- `tools/build-quiz.py`: copies questions from `index.html` into `quiz.html` (run it after you edit questions)
 - `apps-script/Code.gs`: the script that receives student results and builds the Google Sheet
 
 Students answer questions, then go to **My Results** and press **Send my results**. The page waits for the Sheet to confirm the results arrived before it shows "Sent", so a failed send never looks like a success.
@@ -60,6 +62,36 @@ If the page loads but sending says "Not sent: the teacher's sheet did not answer
 Post the GitHub Pages link in Google Classroom as a **Material** link, not as an attached `.html` file. Tell students to press **Send my results** whenever they finish a practice session. The page reminds them when they've answered more since their last send.
 
 ---
+
+## The quiz
+
+`quiz.html` is live at `https://arosenbaum993.github.io/ush-eoc-study-guide/quiz.html`. Post that link the same way as the study guide.
+
+- **What's on it:** 50 questions worth 65 points. Each domain has 10 questions worth 13 points: every standard in the domain, spread in proportion to the study guide, with 3 multi-point items (Multiple Select, Two-Part, Sort It, or Fill the Blanks) and no DOK 1 items.
+- **How it works:** students see no answers until they press **Submit my quiz**. Answers save on the device as they go. After they submit, the answers lock, and the page shows the total score, a score for each domain and standard, the missed questions with their elements, and the correct answer and explanation for every question.
+- **Retakes:** a student can press **Retake the quiz**, which erases the attempt on that device. Anything they already sent stays in the Sheet.
+- **These are study guide questions:** students who practiced in the guide have seen these exact items. The quiz shows how well they kept what they practiced. It does not measure transfer to new items.
+
+| Domain | Quiz questions | Study guide items |
+|---|---|---|
+| 1 | Q1-Q10 | D1-02, 03, 04, 07, 09, 10, 11, 12, 14, 15 |
+| 2 | Q11-Q20 | D2-02, 04, 06, 08, 12, 14, 15, 17, 18, 21 |
+| 3 | Q21-Q30 | D3-01, 02, 05, 06, 07, 09, 12, 13, 14, 16 |
+| 4 | Q31-Q40 | D4-04, 05, 07, 09, 12, 13, 15, 17, 19, 24 |
+| 5 | Q41-Q50 | D5-02, 05, 08, 09, 11, 14, 17, 18, 20, 23 |
+
+### Quiz results
+
+Use a **second** Sheet for the quiz. The Students tab keeps only each student's latest send, so if the quiz used the study guide's URL, a student's quiz score would replace their study guide row.
+
+1. Repeat Step 1 and Step 2 with a new Sheet named `USH EOC Quiz Results` and the same `Code.gs`.
+2. Open `quiz.html`, find `SCRIPT_URL: "PASTE_YOUR_QUIZ_APPS_SCRIPT_WEB_APP_URL_HERE"`, and paste the new `/exec` URL. Set `TEACHERS` and `PERIODS` the same way as in Step 3.
+
+On the quiz Sheet, every domain and standard counts all of its points, so a blank answer counts as 0, not as "not attempted." **Missed questions** use quiz numbers (for example `Q8 4d`).
+
+### Changing the quiz questions
+
+The quiz keeps its own copy of the questions. If you fix a question in `index.html`, or want different items, edit the `PICK` list in `tools/build-quiz.py` if needed, then run `python3 tools/build-quiz.py` from this folder and upload the new `quiz.html`.
 
 ## Reading the Sheet
 
