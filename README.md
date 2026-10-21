@@ -8,7 +8,7 @@ What's in this folder:
 - `tools/build-quiz.py`: copies questions from `index.html` into `quiz.html` (run it after you edit questions)
 - `apps-script/Code.gs`: the script that receives student results and builds the Google Sheet
 
-Students answer questions, then go to **My Results** and press **Send my results**. The page waits for the Sheet to confirm the results arrived before it shows "Sent", so a failed send never looks like a success.
+Students enter their name, teacher, and class period in the box at the top of the page (it stays there on every tab, whether or not sending is turned on). They answer questions, then go to **My Results** and press **Send my results**. The page waits for the Sheet to confirm the results arrived before it shows "Sent", so a failed send never looks like a success.
 
 ---
 
@@ -52,7 +52,7 @@ The district content filter has blocked embedded pages before, so test on a stud
 
 1. Open the GitHub Pages link.
 2. Answer one question and press **Check answer**.
-3. Go to **My Results**, fill in the name, teacher, and period, and press **Send my results**.
+3. Fill in the name, teacher, and period box at the top of the page and press **Save**. Then go to **My Results** and press **Send my results**.
 4. You should see "Sent. Your teacher received your results at..." and a new row in the Sheet.
 
 If the page loads but sending says "Not sent: the teacher's sheet did not answer", the filter is blocking `script.google.com` for students. Ask the tech team to allow `script.google.com` and `script.googleusercontent.com`.

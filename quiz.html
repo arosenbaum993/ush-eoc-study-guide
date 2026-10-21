@@ -177,6 +177,10 @@ textarea{width:100%;min-height:9rem;font-family:var(--f-mono);font-size:.8rem;bo
 .sendstatus.ok{color:var(--ok)}.sendstatus.bad{color:var(--bad)}.sendstatus.wait{color:var(--muted)}
 .newbanner{background:var(--goldsoft);border-radius:8px;padding:8px 12px;font-size:.9rem;font-weight:600}
 .secondary{display:flex;gap:10px;flex-wrap:wrap}
+.who{background:var(--surface);border:2px solid var(--gold);border-radius:var(--r);padding:14px 16px;margin-bottom:18px;display:grid;gap:10px}
+.who h3{font-size:1.15rem}
+.who.done{border-width:1px;border-color:var(--line);padding:10px 16px;display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center;font-size:.95rem}
+.linkbtn{border:0;background:none;color:var(--ink);text-decoration:underline;font-weight:600;padding:0}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 /* END shared styles */
 
@@ -208,8 +212,9 @@ textarea{width:100%;min-height:9rem;font-family:var(--f-mono);font-size:.8rem;bo
     <h1>US History EOC Quiz</h1>
     <p>50 questions, 10 from each domain, worth 65 points. You will not see answers until you press Submit at the bottom.</p>
   </header>
+  <section id="who" aria-label="Your name and class"></section>
   <main id="main"></main>
-  <p class="foot">Questions come from the <a href="./">US History EOC Study Guide</a>, which is built from the GaDOE US History Teacher Notes, the Georgia Standards of Excellence, and the Georgia Milestones US History Assessment Blueprint (July 2025). Your answers are saved in this browser until you submit.</p>
+  <p class="foot">Questions come from the <a href="./">US History EOC Study Guide</a>, which is built from the GaDOE US History Teacher Notes, the Georgia Standards of Excellence, and the Georgia Milestones US History Assessment Blueprint (July 2025). Enter your name and class at the top before you start. Your answers are saved in this browser until you submit.</p>
 </div>
 
 <script>
@@ -334,6 +339,7 @@ function statusChip(it){
   return complete(it,val(it)) ? `<span class="status answered">Answered</span>` : "";
 }
 function render(){
+  drawWho();
   const m=document.getElementById("main");
   const qs = D.map(d=>`<section class="dsec" style="--dc:var(--d${d.n});--dt:var(--d${d.n}t)">
      <div class="dhead"><div><div class="eyebrow">Domain ${d.n} · ${BP[d.n]}% of the EOC</div><h2>${esc(d.name)}</h2></div></div>
@@ -378,6 +384,8 @@ function bindQuiz(){
   document.getElementById("submitbtn").onclick=()=>{
     const open=ALL.filter(it=>!complete(it,val(it)));
     const box=document.getElementById("subconfirm");
+    const need=whoNeed();
+    if(need.length){ box.innerHTML=`<p class="sendstatus bad" style="margin:0">Fill in your ${need.join(", ")} in the box at the top of the page before you submit.</p>`; editWho=true; drawWho(); document.getElementById("who").scrollIntoView({block:"start",behavior:"smooth"}); return; }
     if(!open.length){ submit(); return; }
     box.innerHTML=`<div class="confirm"><span>${open.length} question${open.length>1?"s are":" is"} unanswered or incomplete: ${open.map(it=>`<a href="#q${it.qn}">Q${it.qn}</a>`).join(", ")}. Blank parts score 0.</span><button class="btn" id="subyes" style="background:var(--bad)">Submit anyway</button><button class="btn ghost" id="subno">Keep working</button></div>`;
     document.getElementById("subyes").onclick=submit;
@@ -430,26 +438,48 @@ function summary(){
 // ---------- sending (same Apps Script protocol as the study guide, to a separate Sheet) ----------
 const CFG = window.USH_QUIZ_CONFIG || {};
 const sendReady = () => CFG.SCRIPT_URL && /^https:\/\/script\.google\.com\/macros\/s\/.+\/exec$/.test(CFG.SCRIPT_URL);
-function sendPanel(){
-  if(!sendReady()) return `<div class="sendbox"><h3>Send my results to my teacher</h3><p style="margin:0">Sending is not turned on for this quiz yet. Use <b>Copy my results</b> and paste them where your teacher asks.</p></div>`;
+// ---------- student info: always on the page, whether or not sending is turned on ----------
+let editWho=false;
+const whoDone = () => !!(S.first && S.last && S.teacher && S.period);
+function whoNeed(){ const need=[]; if(!S.first) need.push("first name"); if(!S.last) need.push("last name"); if(!S.teacher) need.push("teacher"); if(!S.period) need.push("class period"); return need; }
+function drawWho(){
+  const el=document.getElementById("who");
+  if(whoDone() && !editWho){
+    el.className="who done";
+    el.innerHTML=`<span>Taking the quiz as <b>${esc(S.first+" "+S.last)}</b> · ${esc(S.teacher)} · Period ${esc(S.period)}</span><button class="linkbtn" id="who-edit">Change</button>`;
+    document.getElementById("who-edit").onclick=()=>{ editWho=true; drawWho(); document.getElementById("f-first").focus(); };
+    return;
+  }
   const teachers = (CFG.TEACHERS||[]);
   const tField = teachers.length
     ? `<select id="f-teacher"><option value="">Choose...</option>${teachers.map(t=>`<option ${S.teacher===t?"selected":""}>${esc(t)}</option>`).join("")}</select>`
     : `<input id="f-teacher" value="${esc(S.teacher)}" placeholder="Teacher's last name">`;
   const periods = CFG.PERIODS || ["1","2","3","4","5","6","7","8"];
-  return `<div class="sendbox"><h3>Send my results to my teacher</h3>
+  el.className="who";
+  el.innerHTML=`<h3>Enter your name and class</h3>
     <div class="fields">
       <label for="f-first">First name<input id="f-first" value="${esc(S.first)}" autocomplete="given-name"></label>
       <label for="f-last">Last name<input id="f-last" value="${esc(S.last)}" autocomplete="family-name"></label>
       <label for="f-teacher">Teacher${tField}</label>
       <label for="f-period">Class period<select id="f-period"><option value="">Choose...</option>${periods.map(p=>`<option ${S.period===p?"selected":""}>${esc(p)}</option>`).join("")}</select></label>
     </div>
+    <div class="actions"><button class="btn" id="who-save" style="background:var(--gold);color:var(--bg)">Save</button><span class="sendstatus" id="who-msg" role="status"></span></div>`;
+  ["first","last","teacher","period"].forEach(k=>{ const f=document.getElementById("f-"+k); f.addEventListener(f.tagName==="SELECT"?"change":"input",()=>{ S[k]=f.value.trim(); save(); }); });
+  document.getElementById("who-save").onclick=()=>{
+    const need=whoNeed();
+    if(need.length){ const m=document.getElementById("who-msg"); m.className="sendstatus bad"; m.textContent="Fill in your "+need.join(", ")+"."; return; }
+    editWho=false; drawWho(); if(done()) render();
+  };
+}
+function sendPanel(){
+  if(!sendReady()) return `<div class="sendbox"><h3>Send my results to my teacher</h3><p style="margin:0">Sending is not turned on for this copy yet. Use <b>Copy my results</b> and paste them where your teacher asks.</p></div>`;
+  return `<div class="sendbox"><h3>Send my results to my teacher</h3>
+  <p style="margin:0">${whoDone()?`Sending as <b>${esc(S.first+" "+S.last)}</b> · ${esc(S.teacher)} · Period ${esc(S.period)}. To change this, use <b>Change</b> at the top of the page.`:`Fill in your name, teacher, and class period in the box at the top of the page first.`}</p>
     <div class="actions"><button class="btn gold" id="send">Send my results</button><span class="sendstatus ${S.sentAt?"ok":"wait"}" id="sendstatus" role="status">${S.sentAt?`Last sent ${new Date(S.sentAt).toLocaleString()}.`:"Not sent yet."}</span></div>
   </div>`;
 }
 function bindSend(){
   if(!sendReady()) return;
-  ["first","last","teacher","period"].forEach(k=>{ const el=document.getElementById("f-"+k); if(el) el.addEventListener(el.tagName==="SELECT"?"change":"input",()=>{ S[k]=el.value.trim(); save(); }); });
   const b=document.getElementById("send"); if(b) b.onclick=sendResults;
 }
 function payload(){
@@ -461,8 +491,8 @@ function payload(){
 }
 function sendResults(){
   const st=document.getElementById("sendstatus"), b=document.getElementById("send");
-  const need=[]; if(!S.first) need.push("first name"); if(!S.last) need.push("last name"); if(!S.teacher) need.push("teacher"); if(!S.period) need.push("class period");
-  if(need.length){ st.className="sendstatus bad"; st.textContent="Fill in your "+need.join(", ")+" first."; return; }
+  const need=whoNeed();
+  if(need.length){ st.className="sendstatus bad"; st.textContent="Fill in your "+need.join(", ")+" in the box at the top of the page first."; editWho=true; drawWho(); document.getElementById("who").scrollIntoView({block:"start",behavior:"smooth"}); return; }
   b.disabled=true; st.className="sendstatus wait"; st.textContent="Sending...";
   const cb="ushqcb_"+Date.now(); let doneFlag=false;
   const tag=document.createElement("script");
