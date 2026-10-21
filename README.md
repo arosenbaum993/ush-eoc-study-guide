@@ -16,7 +16,7 @@ Students enter their name, teacher, and class period in the box at the top of th
 
 1. Sign in with your school Google account and create a new Google Sheet. Name it `USH EOC Study Guide Results`.
 2. Click **Extensions > Apps Script**.
-3. Delete everything in the `Code.gs` editor. Paste in the whole contents of `apps-script/Code.gs` and click **Save**.
+3. Delete everything in the `Code.gs` editor. Paste in the whole contents of [`apps-script/Code.gs`](apps-script/Code.gs) and click **Save**. (On GitHub, open the file and use the **Copy raw file** button at the top right of the code.)
 4. In the function menu at the top, choose **setup** and click **Run**. Approve the permission prompts. If Google shows "Google hasn't verified this app", click **Advanced**, then **Go to (project name)**.
 5. Go back to the Sheet. It now has three tabs: **Submissions**, **Students**, and **Needs Help**.
 6. Optional test: back in Apps Script, choose **testSubmission** and click **Run**. A "Student, Test" row should appear in **Students**. Delete that row and its row in **Submissions** before students start.
@@ -86,6 +86,8 @@ Use a **second** Sheet for the quiz. The Students tab keeps only each student's 
 
 1. Repeat Step 1 and Step 2 with a new Sheet named `USH EOC Quiz Results` and the same `Code.gs`.
 2. Open `quiz.html`, find `SCRIPT_URL: "PASTE_YOUR_QUIZ_APPS_SCRIPT_WEB_APP_URL_HERE"`, and paste the new `/exec` URL. Set `TEACHERS` and `PERIODS` the same way as in Step 3.
+
+If both pages ever send to the same Sheet, nothing is overwritten: the Students tab keeps a separate row for each student's study guide and quiz results (see the **Form** column), and Needs Help marks quiz entries with "(quiz)". Separate Sheets are still easier to read.
 
 On the quiz Sheet, every domain and standard counts all of its points, so a blank answer counts as 0, not as "not attempted." **Missed questions** use quiz numbers (for example `Q8 4d`).
 
